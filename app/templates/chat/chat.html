@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="author" content="Yeeku.H.Lee(CrazyIt.org)" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>聊天页面</title>
+</head>
+<body onload="sendEmptyRequest();">
+<!--<body>-->
+<div style="width:780px;border:1px solid black;text-align:center">
+<h3>聊天页面</h3>
+<p>
+<textarea id="chatArea" name="chatArea" cols="90"
+	rows="30" readonly="readonly"></textarea>
+</p>
+<div align="center">
+	<input id="chatMsg" name="chatMsg" type="text" focus
+	size="90" onkeypress="enterHandler(event);"/>
+	<input type="button" name="button" value="提交"
+	onclick="sendRequest();"/>
+</div>
+</div>
+<script type="text/javascript">
+// 创建XMLHttpRequest对象
+var xhr = new XMLHttpRequest();
+// 发送请求函数
+function sendRequest()
+{
+	var input = document.getElementById("chatMsg");
+	// input是用户输入聊天信息的单行文本框
+	var chatMsg = input.value;
+	// 定义发送请求的目标URL
+	var url = "chat.do";
+	// 通过open方法取得与服务器的连接
+	// 发送POST请求
+	xhr.open("POST", url, true);
+	// 设置请求头-发送POST请求时需要该请求头
+	xhr.setRequestHeader("Content-Type",
+		"application/x-www-form-urlencoded");
+	// 指定处理服务器响应的事件处理函数
+	xhr.onload = processResponse;
+	// 清空输入框的内容
+	input.value = "";
+	// 发送请求，send的参数包含许多的key-value对。
+	// 即以：请求参数名=请求参数值 的形式发送请求参数。
+	xhr.send("chatMsg=" + chatMsg); 
+}
+function sendEmptyRequest()
+{
+	// 定义发送请求的目标URL
+	var url = "chat.do";
+
+	{% if not current_user.is_authenticated %}
+		return;
+	{% endif %}
+	// 发送POST请求
+	xhr.open("POST", url, true);
+	// 设置请求头-发送POST请求时需要该请求头
+	xhr.setRequestHeader("Content-Type",
+		"application/x-www-form-urlencoded");
+	// 指定处理服务器响应的事件处理函数
+	xhr.onload = processResponse;
+	// 发送请求,，不发送任何参数
+	xhr.send(null);
+	// 指定0.8s之后再次发送请求
+	setTimeout("sendEmptyRequest()" , 800);
+}
+// 处理服务器响应的函数
+function processResponse()
+{
+	// 服务器响应正确（当服务器响应正确时，返回值为200的状态码）
+	if (xhr.status == 200)
+	{
+		// 使用chatArea多行文本域显示服务器响应的文本
+		document.getElementById("chatArea").value 
+			= xhr.responseText;
+	}
+	else
+	{
+		// 提示页面响应不正常
+		window.alert("您所请求的页面有异常。");
+	}
+}
+function enterHandler(event)
+{
+	// 获取用户单击键盘的“键值”
+	var keyCode = event.keyCode ? event.keyCode 
+		: event.which ? event.which : event.charCode;
+	// 如果是回车键
+	if (keyCode == 13)
+	{
+		sendRequest();
+	}
+}
+</script>
+</body>
+</html>
